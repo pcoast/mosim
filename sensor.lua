@@ -17,36 +17,6 @@ function Sensor.new(color, x, y, r)
   return self
 end
 
-function Sensor.set_color(self,color)
-  self.color = color
-end
-
-function Sensor.set_xyr(self,x,y,r)
-  self.x = x
-  self.y = y
-  self.r = r
-end
-
-function Sensor.get_color(self)
-  return self.color
-end
-
-function Sensor.get_xyr(self)
-  return self.x, self.y, self.r
-end
-
-function Sensor.get_x(self)
-  return self.x
-end
-
-function Sensor.get_y(self)
-  return self.y
-end
-
-function Sensor.get_r(self)
-  return self.r
-end
-
 function mqcb(self)
   return function (msg)
   end

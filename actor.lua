@@ -2,10 +2,10 @@ local mqtt = require("mqtt_library")
 Actor = {}
 Actor.__index = Actor
 
-function Actor.new(cor, x, y, r)
+function Actor.new(color, x, y, r)
   local self = setmetatable({}, Actor)
 
-  self.cor = cor
+  self.color = color
   self.x = x
   self.y = y
   self.r = r
@@ -15,36 +15,6 @@ function Actor.new(cor, x, y, r)
   self.leaves = {}
 
   return self
-end
-
-function Actor.set_cor(self,cor)
-  self.cor = cor
-end
-
-function Actor.set_xyr(self,x,y,r)
-  self.x = x
-  self.y = y
-  self.r = r
-end
-
-function Actor.get_cor(self)
-  return self.cor
-end
-
-function Actor.get_x(self)
-  return self.x
-end
-
-function Actor.get_y(self)
-  return self.y
-end
-
-function Actor.get_r(self)
-  return self.r
-end
-
-function Actor.get_client(self)
-  return self.mqtt_client
 end
 
 local function mqcb(self)
@@ -73,7 +43,7 @@ function Actor.draw(self)
   local l = self.r * math.sqrt(3)
   local h = self.r * 1.5
 
-  love.graphics.setColor(self.cor[1], self.cor[2], self.cor[3])
+  love.graphics.setColor(self.color[1], self.color[2], self.color[3])
   love.graphics.polygon("fill", self.x - l / 2, self.y + h / 3,
     self.x + l / 2, self.y + h / 3,
     self.x , self.y - 2 * h / 3)

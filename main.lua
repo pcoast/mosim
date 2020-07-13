@@ -26,7 +26,7 @@ function love.load ()
   for i = 1, 2 do
     sensores[i] = Sensor.new(cores[i][1],i*TAM/3,TAM/2,TAM/8)
 
-    -- sensores[i]:connect("broker.hivemq.com", 1883, string.format("auusensor %d", i), "obcteste")
+    sensores[i]:connect("broker.hivemq.com", 1883, string.format("auusensor %d", i), "obcteste")
   end
 
   mqtt_client = mqtt.client.create("broker.hivemq.com", 1883, mqttcb)
