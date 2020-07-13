@@ -1,8 +1,16 @@
-package.path = "home/miguel/inf1350/testee/"
-local S = require ("sensor")
+require ("sensor")
+require ("actor")
 local mqtt = require("mqtt_library")
 local TAM = 400
 local cores = {}
+cores[1] = {
+  {1,0,0},
+  {0.6, 0, 0}
+}
+cores[2] = {
+  {0.5,1,0},
+  {0.35,0.4,0.2}
+}
 
 local sensores = {}
   
@@ -19,10 +27,6 @@ function love.load ()
 
     sensores[i]:connect("broker.hivemq.com", 1883, string.format("auusensor %d", i), "obcteste")
   end
-
-  --mqtt_client = mqtt.client.create("broker.hivemq.com", 1883, mqttcb)
-  --mqtt_client:connect("cliente love")
-  --mqtt_client:subscribe({"paralove"})
 end
 
 function love.mousepressed (mx, my)
@@ -35,8 +39,6 @@ function love.update(dt)
   for i = 1, 2 do
     sensores[i]:update(dt)
   end
-  -- tem que chamar o handler aqui!
-  --mqtt_client:handler()
 end
 
 function love.draw ()
