@@ -56,7 +56,7 @@ local function mqcb(self)
 end
 
 function Actor.connect(self, host, port, id, topic)
-  self.mqtt_client = mqtt.client.create(broker, port, mqcb(self))
+  self.mqtt_client = mqtt.client.create(host, port, mqcb(self))
   self.mqtt_client:connect(id)
   self.mqtt_client:subscribe({topic})
 end
