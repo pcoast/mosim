@@ -2,15 +2,6 @@ require ("sensor")
 require ("actor")
 local mqtt = require("mqtt_library")
 local TAM = 400
-local cores = {}
-cores[1] = {
-  {1,0,0},
-  {0.6, 0, 0}
-}
-cores[2] = {
-  {0.5,1,0},
-  {0.35,0.4,0.2}
-}
 
 local sensores = {}
   
@@ -23,9 +14,8 @@ function love.load ()
   love.graphics.setBackgroundColor(0,0,0)
 
   for i = 1, 2 do
-    sensores[i] = Sensor.new(cores[i][1],i*TAM/3,TAM/2,TAM/8)
-
-    sensores[i]:connect("broker.hivemq.com", 1883, string.format("auusensor %d", i), "obcteste")
+    sensores[i] = Sensor.new(string.format("inf1350-obc-sensor-", i),i*TAM/3,TAM/2,TAM/8)
+    sensores[i]:connect("broker.hivemq.com", 1883, "inf1350-obc-topic")
   end
 end
 
@@ -46,7 +36,6 @@ function love.draw ()
     sensores[i]:draw()
   end
 end
-
 
 function love.quit()
   os.exit()

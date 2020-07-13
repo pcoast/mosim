@@ -2,13 +2,14 @@ local mqtt = require("mqtt_library")
 Sensor = {}
 Sensor.__index = Sensor
 
-function Sensor.new(color, x, y, r)
+function Sensor.new(id, x, y, r)
   local self = setmetatable({}, Sensor)
 
-  self.color = color
+  self.color = { 1.0, 1.0, 1.0 }
   self.x = x
   self.y = y
   self.r = r
+  self.id = id
 
   self.mqtt_client = nil
   self.parent = nil
@@ -17,14 +18,18 @@ function Sensor.new(color, x, y, r)
   return self
 end
 
+function Sensor.get_id(self)
+  return self.id
+end
+
 function mqcb(self)
   return function (msg)
   end
 end
 
-function Sensor.connect(self, host, port, id, topic)
+function Sensor.connect(self, host, port, topic)
   self.mqtt_client = mqtt.client.create(host, port, mqcb(self))
-  self.mqtt_client:connect(id)
+  self.mqtt_client:connect(self.id)
   self.mqtt_client:subscribe({topic})
 end
 
