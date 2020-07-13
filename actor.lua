@@ -2,19 +2,24 @@ local mqtt = require("mqtt_library")
 Actor = {}
 Actor.__index = Actor
 
-function Actor.new(color, x, y, r)
+function Actor.new(id, x, y, r)
   local self = setmetatable({}, Actor)
 
-  self.color = color
+  self.color = { 1.0, 1.0, 1.0}
   self.x = x
   self.y = y
   self.r = r
-
+  
+  self.id = id
   self.mqtt_client = nil
   self.nChilds = 0
   self.leaves = {}
 
   return self
+end
+
+function Actor.get_id(self)
+  return self.id
 end
 
 local function mqcb(self)
@@ -25,9 +30,9 @@ local function mqcb(self)
   end
 end
 
-function Actor.connect(self, host, port, id, topic)
+function Actor.connect(self, host, port,topic)
   self.mqtt_client = mqtt.client.create(host, port, mqcb(self))
-  self.mqtt_client:connect(id)
+  self.mqtt_client:connect(self.id)
   self.mqtt_client:subscribe({topic})
 end
 
