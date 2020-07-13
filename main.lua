@@ -4,15 +4,6 @@ local mqtt = require("mqtt_library")
 local TAM = 400
 local cores = {}
 
-cores[1] = {
-  {1,0,0},
-  {0.6, 0, 0}
-}
-cores[2] = {
-  {0.5,1,0},
-  {0.35,0.4,0.2}
-}
-
 local sensores = {}
   
 local function mqttcb (msg)
@@ -26,12 +17,12 @@ function love.load ()
   for i = 1, 2 do
     sensores[i] = Sensor.new(cores[i][1],i*TAM/3,TAM/2,TAM/8)
 
-    -- sensores[i]:connect("broker.hivemq.com", 1883, string.format("auusensor %d", i), "obcteste")
+    sensores[i]:connect("broker.hivemq.com", 1883, string.format("auusensor %d", i), "obcteste")
   end
 
-  mqtt_client = mqtt.client.create("broker.hivemq.com", 1883, mqttcb)
-  mqtt_client:connect("cliente love")
-  mqtt_client:subscribe({"paralove"})
+  --mqtt_client = mqtt.client.create("broker.hivemq.com", 1883, mqttcb)
+  --mqtt_client:connect("cliente love")
+  --mqtt_client:subscribe({"paralove"})
 end
 
 function love.mousepressed (mx, my)
@@ -45,7 +36,7 @@ function love.update(dt)
     sensores[i]:update(dt)
   end
   -- tem que chamar o handler aqui!
-  mqtt_client:handler()
+  --mqtt_client:handler()
 end
 
 function love.draw ()
