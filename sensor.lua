@@ -51,11 +51,11 @@ function Sensor.keypressed(self, mx, my, key)
     
     if key == "LC" then
       if self.state then
-        self.mqtt_client:publish("inf1350-obc-topic", string.format("%s;%s;mid detect %f %f;%f",self.id,self.parent,mx,my,os.time()))
+        self.mqtt_client:publish("inf1350-obc-topic", string.format("%s;%s;m%s detect %f %f;%f",self.id,self.parent,self.id,mx,my,os.time()))
         self.state = false
         self.color = {1.0,3.0,3.0}
       else
-        self.mqtt_client:publish("inf1350-obc-topic", string.format("%s;%s;mid loss %f %f;%f",self.id,self.parent,mx,my,os.time()))
+        self.mqtt_client:publish("inf1350-obc-topic", string.format("%s;%s;m%s loss %f %f;%f",self.id,self.parent,self.id,mx,my,os.time()))
         self.state = true
         self.color = {1.0,1.0,1.0}
       end
