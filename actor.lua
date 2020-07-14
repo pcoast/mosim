@@ -108,6 +108,23 @@ function Actor.update(self, dt)
   end
 end
 
+function Actor.getxy(self)
+  return self.x,self.y
+end
+
+function Actor.keypressed(self, mx, my, key)
+  if (math.sqrt((mx - self.x)^2 + (my - self.y)^2) < self.r) then
+    print("sensor clicado")
+    
+    if key == "LC" then
+    end
+  
+    return true
+  end
+
+  return false
+end
+
 function Actor.draw(self)
   local l = self.r * math.sqrt(3)
   local h = self.r * 1.5
