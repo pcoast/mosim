@@ -12,11 +12,26 @@ function Actor.new(id, x, y, r)
   
   self.id = id
   self.mqtt_client = nil
-  self.nChilds = 0
-  self.leaves = {}
+  self.topic = ""
+
+  self.childs = {}
+
+  self.lastCId = -1
+
+  self.buffer = {}
+  self.bufferCId = 0
+  self.bufferConfs = {}
+
+  self.auxBuffer = {}
+  self.auxBufferCId = 0
+  self.auxBufferConfs = {}
 
   return self
 end
+
+function Actor.get_childs(self) then
+  return self.childs
+end 
 
 function Actor.get_id(self)
   return self.id
@@ -24,24 +39,73 @@ end
 
 local function mqcb(self)
   return function (msg)
+    sender, dest, m, timestamp = string.match(msg, "(.+);(.+);(.+)") 
+
     -- Checa se eh o destinatario da mensagem
-      -- Se for uma confirmacao, adiciona ao contador da mensagem referente
-      -- Se nao, envia confirmacoes as folhas e adiciona nova mensagem no buffer
+    if dest == self.id then
+      _, count = string.gsub(m, "(%w+)")
+
+      if count == 2 then
+        -- Se for uma confirmacao, adiciona ao contador da mensagem referente
+        cmd, cId = string.match(m, "(%w+) (%w+)")
+
+        if cId == bufferCId then
+          -- insere o remetente na tabela de confirmados
+          table.insert(bufferConfs, sender)
+
+          if #bufferConfs == #childs then
+            for i, bmsg in ipairs(buffer) do
+              mqtt_client:publish(self.topic, string.format("event %s", bmsg))
+            end
+
+            self.buffer = {}
+            self.bufferCId = 0
+            self.bufferConfs = {}
+          end
+
+        elseif cId == auxBufferCId then
+          -- insere o remetente na tabela de confirmados
+          table.insert(auxBufferConfs, sender)
+
+          -- checa para ver se as confirmacoes estão feitas
+          if #auxBufConfs == #childs then
+            for i, bmsg in ipairs(auxBuffer) do
+                mqtt_client:publish(self.topic, string.format("event %s", bmsg))
+            end
+
+            self.auxBuffer = {}
+            self.auxBufferCId = 0
+            self.auxBufferConfs = {}
+          end
+        else
+          print("erro no cid")
+        end
+
+      elseif count == 3 then
+        -- Se nao, envia confirmacoes as folhas e adiciona nova mensagem no buffer
+
+      else
+        print("erro no count")
+      end
+    end
   end
 end
 
-function Actor.connect(self, host, port,topic)
+function Actor.connect(self, host, port, topic)
   self.mqtt_client = mqtt.client.create(host, port, mqcb(self))
   self.mqtt_client:connect(self.id)
   self.mqtt_client:subscribe({topic})
+  self.topic = topic
 end
 
-function Actor.addChild(self)
-  self.nChilds = self.nChilds + 1
+function Actor.addChild(self, child)
+  table.insert(childs, child)
 end
 
 function Actor.update(self, dt)
-  self.mqtt_client:handler()
+  if mqtt_client ~= nil then
+    self.mqtt_client:handler()
+  end
 end
 
 function Actor.draw(self)
