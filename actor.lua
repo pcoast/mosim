@@ -29,7 +29,7 @@ function Actor.new(id, x, y, r)
   return self
 end
 
-function Actor.get_childs(self) then
+function Actor.get_childs(self)
   return self.childs
 end 
 
@@ -39,7 +39,7 @@ end
 
 local function mqcb(self)
   return function (msg)
-    sender, dest, m, timestamp = string.match(msg, "(.+);(.+);(.+)") 
+    sender, dest, m, timestamp = string.match(msg, "(.+);(.+);(.+);(.+)") 
 
     -- Checa se eh o destinatario da mensagem
     if dest == self.id then
