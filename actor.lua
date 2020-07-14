@@ -37,6 +37,31 @@ function Actor.get_id(self)
   return self.id
 end
 
+local function table_contains (table, item)
+  for i, elem in ipairs(table) do
+    if i == item then
+      return true
+    end
+  end
+  
+  return false
+end
+local function get_leaves (childs)
+  nextChilds = {}
+
+  for i, c in ipairs(childs) do
+    for j, nc in ipairs(c:get_childs()) do
+      table.insert(nextChilds, nc)
+    end
+  end
+
+  if nextChilds == {} then
+    return childs
+  else
+    return get_leaves(nextChilds)
+  end
+end
+
 local function mqcb(self)
   return function (msg)
     sender, dest, m, timestamp = string.match(msg, "(.+);(.+);(.+);(.+)") 
@@ -49,11 +74,11 @@ local function mqcb(self)
         -- Se for uma confirmacao, adiciona ao contador da mensagem referente
         cmd, cId = string.match(m, "(%w+) (%w+)")
 
-        if cId == bufferCId then
+        if cId == self.bufferCId then
           -- insere o remetente na tabela de confirmados
-          table.insert(bufferConfs, sender)
+          table.insert(self.bufferConfs, sender)
 
-          if #bufferConfs == #childs then
+          if #self.bufferConfs == #self.childs then
             for i, bmsg in ipairs(buffer) do
               mqtt_client:publish(self.topic, string.format("event %s", bmsg))
             end
@@ -63,13 +88,13 @@ local function mqcb(self)
             self.bufferConfs = {}
           end
 
-        elseif cId == auxBufferCId then
+        elseif cId == self.auxBufferCId then
           -- insere o remetente na tabela de confirmados
-          table.insert(auxBufferConfs, sender)
+          table.insert(self.auxBufferConfs, sender)
 
           -- checa para ver se as confirmacoes estão feitas
-          if #auxBufConfs == #childs then
-            for i, bmsg in ipairs(auxBuffer) do
+          if #self.auxBufConfs == #self.childs then
+            for i, bmsg in ipairs(self.auxBuffer) do
                 mqtt_client:publish(self.topic, string.format("event %s", bmsg))
             end
 
@@ -81,8 +106,27 @@ local function mqcb(self)
           print("erro no cid")
         end
 
-      elseif count == 3 then
+      elseif count == 4 then
         -- Se nao, envia confirmacoes as folhas e adiciona nova mensagem no buffer
+        mId, cmd, x, y = string.match(m, "(%w+) (%w+) (%w+) (%w+)")
+
+        self.lastCId = self.lastCId + 1
+
+        local cId = self.lastCId -- garantir que o id vai ser manter ao longo da funcao
+
+        if (table_contains(self.bufferConfs, sender)) then
+          -- coloca no buffer auxiliar
+          table.insert(self.auxBuffer, string.format("(%w+) (%w+) (%w+)", cmd, x, y))
+        else
+          -- coloca no buffer normal
+          table.insert(self.buffer, string.format("(%w+) (%w+) (%w+)", cmd, x, y))
+        end
+        
+        leaves = get_leves(self.childs)
+
+        for i, leaf in ipairs(leaves) do
+          self.mqtt_client:publish(self.topic, string.format("confirm %d", cId))
+        end
 
       else
         print("erro no count")
