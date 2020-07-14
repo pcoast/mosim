@@ -50,10 +50,18 @@ function mqcb(self)
         local cmd, cId = string.match(m, "(%w+) (%w+)")
         local cId = tonumber(cId)
 
+        if self.confirms[cId] ~= nil then
+          self.confirms[cId] = self.confirms[cId] + 1
+        else
+          self.confirms[cId] = 1
+        end
 
+        if self.confirms[cId] >= #self.children then
+          -- Repassa ela ao longo da rede
+          self.mqtt_client:publish(self.topic, string.format("%s;%s;%s;%d",self.id,self.parent,m,timestamp))
+          self.confirms[cId] = nil
+        end
       end
-      -- Repassa ela ao longo da rede
-      self.mqtt_client:publish(self.topic, string.format("%s;%s;%s;%d",self.id,self.parent,m,timestamp))
     end
   end
 end

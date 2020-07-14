@@ -128,9 +128,12 @@ local function mqcb(self)
           table.insert(self.bufferConfs, sender)
 
           if #self.bufferConfs == #self.children then
+            self.buffer = sort_buffer(self.buffer, 1, #self.buffer)
+
             for i, bmsg in ipairs(self.buffer) do
               local mTimeStamp, mCmd = string.match(bmsg, "(.+);(.+)")
               self.mqtt_client:publish(self.topic, string.format("event %s", mCmd))
+              print("EVENT", mCmd)
             end
 
             self.buffer = self.auxBuffer
@@ -171,8 +174,6 @@ local function mqcb(self)
               self.mqtt_client:publish(self.topic, 
                 string.format("%s;%s;confirm %d;%d", self.id, leaf:get_id(), cId, os.time()))
             end
-          else
-            self.auxBuffer = sort_buffer(self.auxBuffer, 1, #self.auxBuffer)
           end
         else
           -- coloca no buffer normal
