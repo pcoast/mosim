@@ -3,23 +3,17 @@ require ("actor")
 local mqtt = require("mqtt_library")
 local TAM = 400
 local s,a = 1,1
-local startedge = {}
 
+local startEdge = {}
+local startNode = nil
+  
 local actors = {}
 local sensores = {}
-  
-local function mqttcb (msg)
-  print(msg)
-end
+local lines = {}
 
 function love.load ()
   love.window.setMode(TAM,TAM)
   love.graphics.setBackgroundColor(0,0,0)
-  --[[
-  for i = 1, 2 do
-    sensores[i] = Sensor.new(string.format("inf1350-obc-sensor-", i),i*TAM/3,TAM/2,TAM/8)
-    sensores[i]:connect("broker.hivemq.com", 1883, "inf1350-obc-topic")
-  end]]
 end
 
 function love.mousepressed (mx, my)
@@ -28,31 +22,10 @@ function love.mousepressed (mx, my)
   end
 end
 
-function love.update(dt)
-  for i = 1, #sensores do
-    --print(i)
-    sensores[i]:update(dt)
-  end
-  for i = 1, #actors do
-    --print(i)
-    actors[i]:update(dt)
-  end
-end
-
-function love.draw ()
-  for i = 1, #sensores do
-    sensores[i]:draw()
-  end
-  for i = 1, #actors do
-    actors[i]:draw()
-  end
-end
-
 function love.keypressed(key, scancode, isrepeat)
   local x,y = love.mouse.getPosition()
   
   if key == "s" then
-    print(s)
     local new = Sensor.new(string.format("inf1350-obc-sensor-%d", s),x,y,TAM/16)
     new:connect("broker.hivemq.com", 1883, "inf1350-obc-topic")
     table.insert(sensores,new)
@@ -60,7 +33,6 @@ function love.keypressed(key, scancode, isrepeat)
   end
   
   if key == "a" then
-    print(a)
     local new = Actor.new(string.format("inf1350-obc-actor-%d", a),x,y,TAM/16)
     new:connect("broker.hivemq.com", 1883, "inf1350-obc-topic")
     table.insert(actors,new)
@@ -70,14 +42,16 @@ function love.keypressed(key, scancode, isrepeat)
   if key == "c" then
     for i,elem in ipairs(sensores) do
       if elem:keypressed(x,y,"c") then
-        startedge = elem:getxy()
+        startNode = elem
+        startEdge = elem:get_xy()
       end
     end
-    for i,elem in ipairs(actors) do
-      if elem:keypressed(x,y,"c") then
-        startedge = elem:getxy()
-      end
-    end
+    -- for i,elem in ipairs(actors) do
+    --   if elem:keypressed(x,y,"c") then
+    --     startnode = elem
+    --     startedge = elem:get_xy()
+    --   end
+    -- end
     
   end
 end
@@ -87,22 +61,49 @@ function love.keyreleased(key, scancode)
   
   if key == "c" then
     for i,elem in ipairs(sensores) do
-      if elem:keypressed(x,y,"c") and not (startedge == {}) then
+      if elem:keypressed(x,y,"c") and startEdge[1] ~= nil  then
+        elem:addChild(startNode)
+        startNode:set_parent(elem:get_id())
         love.graphics.setColor(255, 255, 255)
-        love.graphics.line(startedge[1],startedge[2],x,y)
+        table.insert(lines, { startEdge[1], startEdge[2], x, y })
       end
     end
+
     for i,elem in ipairs(actors) do
-      if elem:keypressed(x,y,"c") and not (startedge == {})then
+      if elem:keypressed(x,y,"c") and startEdge[1] ~= nil then
+        elem:addChild(startNode)
+        startNode:set_parent(elem:get_id())
         love.graphics.setColor(255, 255, 255)
-        love.graphics.line(startedge[1],startedge[2],x,y)
+        table.insert(lines, { startEdge[1], startEdge[2], x, y })
       end
     end
-    startedge = {}
+
+    startEdge = {}
+    startNode = nil
+  end
+end
+
+function love.update(dt)
+  for i = 1, #sensores do
+    sensores[i]:update(dt)
+  end
+  for i = 1, #actors do
+    actors[i]:update(dt)
+  end
+end
+
+function love.draw ()
+  for i = 1, #lines do
+    love.graphics.line(lines[i][1],lines[i][2],lines[i][3],lines[i][4])
+  end
+  for i = 1, #sensores do
+    sensores[i]:draw()
+  end
+  for i = 1, #actors do
+    actors[i]:draw()
   end
 end
         
-
 function love.quit()
   os.exit()
 end
