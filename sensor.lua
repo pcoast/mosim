@@ -27,7 +27,10 @@ end
 
 function mqcb(self)
   return function (msg)
-    sender, dest, m, timestamp = string.match(msg, "")
+    sender, dest, m, timestamp = string.match(msg, "(.+);(.+);(.+)")
+    
+    self.mqtt_client:publish("inf1350-obc-topic", string.format("%s;%s;%s;%f",self.id,self.parent,m,timestamp))
+    
   end
 end
 

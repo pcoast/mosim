@@ -109,7 +109,7 @@ function Actor.update(self, dt)
 end
 
 function Actor.getxy(self)
-  return self.x,self.y
+  return {self.x,self.y}
 end
 
 function Actor.keypressed(self, mx, my, key)

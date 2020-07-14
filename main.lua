@@ -88,11 +88,13 @@ function love.keyreleased(key, scancode)
   if key == "c" then
     for i,elem in ipairs(sensores) do
       if elem:keypressed(x,y,"c") and not (startedge == {}) then
+        love.graphics.setColor(255, 255, 255)
         love.graphics.line(startedge[1],startedge[2],x,y)
       end
     end
     for i,elem in ipairs(actors) do
       if elem:keypressed(x,y,"c") and not (startedge == {})then
+        love.graphics.setColor(255, 255, 255)
         love.graphics.line(startedge[1],startedge[2],x,y)
       end
     end
