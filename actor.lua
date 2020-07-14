@@ -155,7 +155,7 @@ local function mqcb(self)
 
         local cId = self.lastCId -- garantir que o id vai ser manter ao longo da funcao
 
-        if table_contains(self.bufferConfs, sender) then
+        if #self.buffer > 0 then
           -- coloca no buffer auxiliar
           table.insert(self.auxBuffer, string.format("%s;%s %s %s", timestamp, cmd, x, y))
           
@@ -178,19 +178,15 @@ local function mqcb(self)
           -- coloca no buffer normal
           table.insert(self.buffer, string.format("%s;%s %s %s", timestamp, cmd, x, y))
         
-          if #self.buffer == 1 then
-            cId = cId + 1
-            self.bufferCId = cId
-            self.lastCId = self.bufferCId
+          cId = cId + 1
+          self.bufferCId = cId
+          self.lastCId = self.bufferCId
 
-            local leaves = find_leaves(self.children)
+          local leaves = find_leaves(self.children)
 
-            for i, leaf in ipairs(leaves) do
-              self.mqtt_client:publish(self.topic, 
-                string.format("%s;%s;confirm %d;%d", self.id, leaf:get_id(), cId, os.time()))
-            end
-          else
-            self.buffer = sort_buffer(self.buffer, 1, #self.buffer)
+          for i, leaf in ipairs(leaves) do
+            self.mqtt_client:publish(self.topic, 
+              string.format("%s;%s;confirm %d;%d", self.id, leaf:get_id(), cId, os.time()))
           end
         end
 
